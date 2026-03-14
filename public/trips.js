@@ -16,6 +16,9 @@ const tripsThemeFiltersEl = document.getElementById('tripsThemeFilters');
 const copyTripsLinkBtn = document.getElementById('copyTripsLink');
 const toggleFavoritesOnlyBtn = document.getElementById('toggleFavoritesOnly');
 const resetTripsFiltersBtn = document.getElementById('resetTripsFilters');
+const tripsKpiVisibleEl = document.getElementById('tripsKpiVisible');
+const tripsKpiStartingEl = document.getElementById('tripsKpiStarting');
+const tripsKpiFavoritesEl = document.getElementById('tripsKpiFavorites');
 
 function loadFavorites() {
   try {
@@ -198,6 +201,23 @@ async function loadInsightsForTrip(item) {
 
 function renderTrips() {
   tripsGridEl.innerHTML = '';
+
+  if (tripsKpiFavoritesEl) {
+    tripsKpiFavoritesEl.textContent = String(state.favorites.size);
+  }
+
+  if (tripsKpiVisibleEl) {
+    tripsKpiVisibleEl.textContent = String(state.filtered.length);
+  }
+
+  if (tripsKpiStartingEl) {
+    if (state.filtered.length === 0) {
+      tripsKpiStartingEl.textContent = '-';
+    } else {
+      const minPrice = Math.min(...state.filtered.map((item) => item.basePrice));
+      tripsKpiStartingEl.textContent = formatCurrency(minPrice);
+    }
+  }
 
   if (state.filtered.length === 0) {
     tripsSummaryEl.textContent = 'No destinations match your filters.';

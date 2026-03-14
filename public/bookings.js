@@ -5,6 +5,11 @@ const searchFormEl = document.getElementById('searchForm');
 const emailQueryEl = document.getElementById('emailQuery');
 const clearSearchBtn = document.getElementById('clearSearch');
 const copyBookingsLinkBtn = document.getElementById('copyBookingsLink');
+const bookingsHealthCopyEl = document.getElementById('bookingsHealthCopy');
+const bookingsHealthConfirmedBarEl = document.getElementById('bookingsHealthConfirmedBar');
+const bookingsHealthCancelledBarEl = document.getElementById('bookingsHealthCancelledBar');
+const bookingsHealthConfirmedValueEl = document.getElementById('bookingsHealthConfirmedValue');
+const bookingsHealthCancelledValueEl = document.getElementById('bookingsHealthCancelledValue');
 
 const state = {
   bookings: [],
@@ -40,6 +45,33 @@ function formatDate(value) {
   return Number.isNaN(date.getTime()) ? 'Unknown date' : date.toLocaleString();
 }
 
+function renderBookingHealth(stats) {
+  if (
+    !bookingsHealthCopyEl ||
+    !bookingsHealthConfirmedBarEl ||
+    !bookingsHealthCancelledBarEl ||
+    !bookingsHealthConfirmedValueEl ||
+    !bookingsHealthCancelledValueEl
+  ) {
+    return;
+  }
+
+  const total = Number(stats?.totalBookings || 0);
+  const confirmed = Number(stats?.confirmedBookings || 0);
+  const cancelled = Number(stats?.cancelledBookings || 0);
+  const confirmedPct = total > 0 ? Math.round((confirmed / total) * 100) : 0;
+  const cancelledPct = total > 0 ? Math.round((cancelled / total) * 100) : 0;
+
+  bookingsHealthConfirmedBarEl.style.width = `${confirmedPct}%`;
+  bookingsHealthCancelledBarEl.style.width = `${cancelledPct}%`;
+  bookingsHealthConfirmedValueEl.textContent = `${confirmedPct}%`;
+  bookingsHealthCancelledValueEl.textContent = `${cancelledPct}%`;
+  bookingsHealthCopyEl.textContent =
+    total > 0
+      ? `${confirmed} confirmed and ${cancelled} cancelled out of ${total} total bookings.`
+      : 'No bookings yet. Create your first reservation from Home.';
+}
+
 async function fetchStats() {
   const response = await fetch('/api/stats');
   if (!response.ok) {
@@ -51,6 +83,7 @@ async function fetchStats() {
 function renderStats(stats) {
   if (!stats) {
     statsGridEl.innerHTML = '<article class="stat-card"><h4>Stats unavailable</h4></article>';
+    renderBookingHealth(null);
     return;
   }
 
@@ -69,6 +102,8 @@ function renderStats(stats) {
         `<article class="stat-card"><p class="stat-label">${card.label}</p><h4>${card.value}</h4></article>`,
     )
     .join('');
+
+  renderBookingHealth(stats);
 }
 
 function renderBookings() {
