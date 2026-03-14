@@ -21,10 +21,27 @@ const copyHomeLinkBtn = document.getElementById('copyHomeLink');
 const favoritesShelfEl = document.getElementById('favoritesShelf');
 const favoritesShelfListEl = document.getElementById('favoritesShelfList');
 const favoritesShelfSummaryEl = document.getElementById('favoritesShelfSummary');
+const homeInspirationGridEl = document.getElementById('homeInspirationGrid');
+const homeGallerySummaryEl = document.getElementById('homeGallerySummary');
 const authForm = document.getElementById('authForm');
 const signupBtn = document.getElementById('signupBtn');
 const signoutBtn = document.getElementById('signoutBtn');
 const authStatusEl = document.getElementById('authStatus');
+const homeKpiDestinationsEl = document.getElementById('homeKpiDestinations');
+const homeKpiSeatsEl = document.getElementById('homeKpiSeats');
+const homeKpiBookingsEl = document.getElementById('homeKpiBookings');
+
+function renderHomeKpis() {
+  if (!homeKpiDestinationsEl || !homeKpiSeatsEl || !homeKpiBookingsEl) {
+    return;
+  }
+
+  const visibleCount = getVisibleDestinations().length;
+  const totalOpenSeats = state.destinations.reduce((sum, item) => sum + Number(item.availableSlots || 0), 0);
+  homeKpiDestinationsEl.textContent = String(visibleCount);
+  homeKpiSeatsEl.textContent = String(totalOpenSeats);
+  homeKpiBookingsEl.textContent = String(state.bookings.length);
+}
 
 function setAuthState(token, user) {
   state.authToken = token || '';
@@ -170,6 +187,49 @@ function renderFavoritesShelf() {
   }
 }
 
+function getDestinationGallery(item) {
+  if (Array.isArray(item.galleryImages) && item.galleryImages.length > 0) {
+    return item.galleryImages;
+  }
+  return item.imageUrl ? [item.imageUrl] : [];
+}
+
+function renderHomeInspirationGallery() {
+  if (!homeInspirationGridEl || !homeGallerySummaryEl) {
+    return;
+  }
+
+  homeInspirationGridEl.innerHTML = '';
+  const cards = state.destinations
+    .slice(0, 6)
+    .flatMap((destination) =>
+      getDestinationGallery(destination).slice(0, 2).map((imageUrl) => ({
+        id: destination.id,
+        name: destination.name,
+        imageUrl,
+      })),
+    )
+    .slice(0, 12);
+
+  if (cards.length === 0) {
+    homeGallerySummaryEl.textContent = 'No images available yet.';
+    return;
+  }
+
+  homeGallerySummaryEl.textContent = `${cards.length} curated travel image(s)`;
+
+  for (const card of cards) {
+    const anchor = document.createElement('a');
+    anchor.className = 'inspiration-tile';
+    anchor.href = `/destination.html?id=${card.id}`;
+    anchor.innerHTML = `
+      <img src="${card.imageUrl}" alt="${card.name}" loading="lazy" />
+      <span>${card.name}</span>
+    `;
+    homeInspirationGridEl.appendChild(anchor);
+  }
+}
+
 function syncHomeQueryParams() {
   const params = new URLSearchParams(window.location.search);
   if (state.activeTheme && state.activeTheme !== 'all') {
@@ -205,6 +265,7 @@ function renderDestinations() {
   const visibleDestinations = getVisibleDestinations();
   const statusPrefix = state.socketConnected ? 'Live updates connected' : 'Live updates disconnected';
   connectionStatusEl.textContent = `${statusPrefix} · ${visibleDestinations.length} shown`;
+  renderHomeKpis();
 
   for (const item of visibleDestinations) {
     const fragment = template.content.cloneNode(true);
@@ -276,6 +337,7 @@ async function loadInsightsForDestination(item) {
 
 function renderBookings() {
   bookingsListEl.innerHTML = '';
+  renderHomeKpis();
   if (state.bookings.length === 0) {
     bookingsListEl.innerHTML = '<p>No bookings yet. Your first customer is one click away.</p>';
     return;
@@ -338,6 +400,7 @@ async function loadData() {
   state.bookings = await bookingsRes.json();
   renderDestinations();
   renderFavoritesShelf();
+  renderHomeInspirationGallery();
   renderBookings();
   openDestinationFromHash();
 }

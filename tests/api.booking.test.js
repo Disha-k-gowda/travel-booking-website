@@ -142,4 +142,22 @@ describe('Booking API', () => {
     expect(details.body.name).toBeTruthy();
     expect(details.body.confirmedBookings).toBeGreaterThanOrEqual(0);
   });
+
+  test('supports health checks and destination query filters', async () => {
+    const health = await request(appContext.app).get('/api/health');
+    expect(health.status).toBe(200);
+    expect(health.body.ok).toBe(true);
+    expect(health.body.counts.destinations).toBeGreaterThanOrEqual(1);
+
+    const filtered = await request(appContext.app).get('/api/destinations?theme=adventure&limit=3&page=1');
+    expect(filtered.status).toBe(200);
+    expect(Array.isArray(filtered.body)).toBe(true);
+    expect(filtered.body.length).toBeLessThanOrEqual(3);
+
+    const first = filtered.body[0];
+    if (first) {
+      expect(Array.isArray(first.galleryImages)).toBe(true);
+      expect(first.galleryImages.length).toBeGreaterThan(0);
+    }
+  });
 });

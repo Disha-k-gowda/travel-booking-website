@@ -43,6 +43,24 @@
     </header>
 
     <main>
+      <section class="kpi-rail" aria-label="Live platform metrics">
+        <article class="kpi-card">
+          <p class="kpi-label">Destinations</p>
+          <h3 id="homeKpiDestinations">0</h3>
+          <span class="kpi-note">Shown in current view</span>
+        </article>
+        <article class="kpi-card">
+          <p class="kpi-label">Open Seats</p>
+          <h3 id="homeKpiSeats">0</h3>
+          <span class="kpi-note">Across all destinations</span>
+        </article>
+        <article class="kpi-card">
+          <p class="kpi-label">Bookings Today</p>
+          <h3 id="homeKpiBookings">0</h3>
+          <span class="kpi-note">Recent transaction feed</span>
+        </article>
+      </section>
+
       <section class="booking-panel favorites-shelf" id="favoritesShelf">
         <div class="section-head">
           <h3>Saved Trips Shelf</h3>
@@ -82,6 +100,14 @@
           <h4>Alpine loops and fjord expeditions</h4>
           <a href="/trips.html?theme=adventure" class="detail-link">View collection</a>
         </article>
+      </section>
+
+      <section class="booking-panel">
+        <div class="section-head">
+          <h3>Inspiration Gallery</h3>
+          <p id="homeGallerySummary">Loading images...</p>
+        </div>
+        <div id="homeInspirationGrid" class="inspiration-grid"></div>
       </section>
 
       <section class="auth-panel">

@@ -20,6 +20,8 @@ const relatedSummaryEl = document.getElementById('relatedSummary');
 const relatedTemplate = document.getElementById('relatedCardTemplate');
 const itineraryTimelineEl = document.getElementById('itineraryTimeline');
 const itineraryStepTemplate = document.getElementById('itineraryStepTemplate');
+const photoGalleryEl = document.getElementById('photoGallery');
+const gallerySummaryEl = document.getElementById('gallerySummary');
 
 let currentDestination = null;
 
@@ -195,7 +197,48 @@ function renderDestination(destination) {
     .map((item) => `<article class="stat-card"><p class="stat-label">${item.label}</p><h4>${item.value}</h4></article>`)
     .join('');
 
+  renderGallery(destination);
   renderItinerary(destination);
+}
+
+function getGalleryImages(destination) {
+  if (Array.isArray(destination.galleryImages) && destination.galleryImages.length > 0) {
+    return destination.galleryImages;
+  }
+  return destination.imageUrl ? [destination.imageUrl] : [];
+}
+
+function renderGallery(destination) {
+  if (!photoGalleryEl || !gallerySummaryEl) {
+    return;
+  }
+
+  photoGalleryEl.innerHTML = '';
+  const gallery = getGalleryImages(destination);
+  if (gallery.length === 0) {
+    gallerySummaryEl.textContent = 'No gallery images available.';
+    return;
+  }
+
+  gallerySummaryEl.textContent = `${gallery.length} image(s)`;
+
+  for (const [index, imageUrl] of gallery.entries()) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'gallery-thumb';
+    if (index === 0) {
+      button.classList.add('active');
+    }
+
+    button.innerHTML = `<img src="${imageUrl}" alt="${destination.name} view ${index + 1}" loading="lazy" />`;
+    button.addEventListener('click', () => {
+      detailImageEl.src = imageUrl;
+      photoGalleryEl.querySelectorAll('.gallery-thumb').forEach((item) => item.classList.remove('active'));
+      button.classList.add('active');
+    });
+
+    photoGalleryEl.appendChild(button);
+  }
 }
 
 async function loadInsights() {

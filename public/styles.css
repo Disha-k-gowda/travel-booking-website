@@ -186,6 +186,11 @@ main {
   box-shadow: 0 16px 45px rgba(0, 0, 0, 0.28);
 }
 
+[data-theme='dark'] .kpi-card {
+  background: linear-gradient(150deg, rgba(8, 26, 42, 0.88), rgba(8, 26, 42, 0.62));
+  box-shadow: 0 16px 30px rgba(0, 0, 0, 0.28);
+}
+
 [data-theme='dark'] .auth-form input,
 [data-theme='dark'] .input-like {
   background: rgba(255, 255, 255, 0.06);
@@ -273,6 +278,11 @@ main {
   background: rgba(255, 255, 255, 0.03);
 }
 
+[data-theme='dark'] .inspiration-tile span {
+  background: rgba(255, 255, 255, 0.13);
+  color: var(--text-main);
+}
+
 [data-theme='dark'] .ghost-btn {
   background: rgba(255, 255, 255, 0.02);
   color: var(--text-main);
@@ -303,6 +313,40 @@ main {
 
 main {
   padding: 24px 0 42px;
+}
+
+.kpi-rail {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.kpi-card {
+  border-radius: 16px;
+  border: 1px solid var(--line-soft);
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.95), rgba(247, 252, 255, 0.9));
+  box-shadow: 0 10px 24px rgba(72, 103, 131, 0.12);
+  padding: 12px 14px;
+}
+
+.kpi-label {
+  margin: 0;
+  color: var(--text-soft);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+}
+
+.kpi-card h3 {
+  margin: 7px 0 2px;
+  font-family: 'Fraunces', serif;
+  font-size: 1.55rem;
+}
+
+.kpi-note {
+  font-size: 0.8rem;
+  color: var(--text-soft);
 }
 
 .workflow-strip {
@@ -699,6 +743,65 @@ main {
   margin-bottom: 20px;
 }
 
+.booking-health {
+  margin: 0 0 16px;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid var(--line-soft);
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.94), rgba(248, 253, 255, 0.9));
+  box-shadow: 0 10px 24px rgba(72, 103, 131, 0.12);
+}
+
+.booking-health .section-head {
+  margin-bottom: 10px;
+}
+
+.health-track-row {
+  display: grid;
+  grid-template-columns: 120px 1fr 52px;
+  gap: 10px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.health-track-row p {
+  margin: 0;
+  font-size: 0.86rem;
+}
+
+.health-track {
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line-soft);
+  background: rgba(255, 255, 255, 0.85);
+  overflow: hidden;
+}
+
+.health-track span {
+  display: block;
+  height: 100%;
+  width: 0;
+  transition: width 0.45s ease;
+}
+
+#bookingsHealthConfirmedBar {
+  background: linear-gradient(120deg, #2ebfa5, #69dbc6);
+}
+
+#bookingsHealthCancelledBar {
+  background: linear-gradient(120deg, #f76e11, #ffb274);
+}
+
+[data-theme='dark'] .booking-health {
+  background: linear-gradient(150deg, rgba(8, 26, 42, 0.88), rgba(8, 26, 42, 0.62));
+  box-shadow: 0 16px 30px rgba(0, 0, 0, 0.28);
+}
+
+[data-theme='dark'] .health-track {
+  background: rgba(255, 255, 255, 0.04);
+}
+
 .stat-card {
   border-radius: 16px;
   border: 1px solid var(--line-soft);
@@ -810,6 +913,75 @@ main {
 
 .detail-link:hover {
   color: var(--sand);
+}
+
+.inspiration-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.inspiration-tile {
+  position: relative;
+  display: block;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--line-soft);
+  min-height: 130px;
+  box-shadow: 0 10px 22px rgba(72, 103, 131, 0.13);
+}
+
+.inspiration-tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.01);
+  transition: transform 0.35s ease;
+}
+
+.inspiration-tile span {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  padding: 6px 8px;
+  border-radius: 10px;
+  background: rgba(7, 22, 36, 0.56);
+  color: #f7f4ea;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.inspiration-tile:hover img {
+  transform: scale(1.06);
+}
+
+.photo-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.gallery-thumb {
+  border: 1px solid var(--line-soft);
+  border-radius: 12px;
+  overflow: hidden;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  min-height: 95px;
+}
+
+.gallery-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.gallery-thumb.active {
+  outline: 2px solid rgba(255, 167, 60, 0.62);
+  outline-offset: 1px;
 }
 
 .quick-book-link {
@@ -1080,8 +1252,17 @@ dialog::backdrop {
     grid-template-columns: 1fr;
   }
 
+  .kpi-rail {
+    grid-template-columns: 1fr;
+  }
+
   .collection-strip {
     grid-template-columns: 1fr;
+  }
+
+  .health-track-row {
+    grid-template-columns: 1fr;
+    gap: 6px;
   }
 
   .chip-filter-bar {

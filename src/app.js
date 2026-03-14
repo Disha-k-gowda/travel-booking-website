@@ -8,11 +8,73 @@ const { registerUser, loginUser, authMiddleware } = require('./authService');
 const { getDestinationWeather } = require('./weatherService');
 const { getDestinationInsights } = require('./freeApis');
 
+const INSIGHTS_TTL_MS = 20 * 60 * 1000;
+
+function detectTripTheme(destination) {
+  const text = `${destination.name} ${destination.description}`.toLowerCase();
+  if (/(alpine|glacier|fjord|mountain|frontier|aurora|snow|expedition)/.test(text)) {
+    return 'adventure';
+  }
+  if (/(heritage|temple|medina|legacy|old-town|cultural|district)/.test(text)) {
+    return 'culture';
+  }
+  if (/(wellness|retreat|lagoon|beach|coastal|island|spa)/.test(text)) {
+    return 'relax';
+  }
+  return 'balanced';
+}
+
+function parseGalleryImages(raw, fallbackImageUrl) {
+  if (Array.isArray(raw) && raw.length > 0) {
+    return raw;
+  }
+
+  if (typeof raw === 'string' && raw.trim()) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed.filter((value) => typeof value === 'string' && value.trim());
+      }
+    } catch (_error) {
+      // Ignore malformed gallery data and fallback to the primary image.
+    }
+  }
+
+  return fallbackImageUrl ? [fallbackImageUrl] : [];
+}
+
+function normalizeDestination(row) {
+  if (!row) {
+    return row;
+  }
+
+  const galleryImages = parseGalleryImages(row.galleryImages, row.imageUrl);
+  return {
+    ...row,
+    galleryImages,
+  };
+}
+
+function toPositiveInt(value, fallback, { min = 1, max = Number.MAX_SAFE_INTEGER } = {}) {
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed)) {
+    return fallback;
+  }
+  if (parsed < min) {
+    return min;
+  }
+  if (parsed > max) {
+    return max;
+  }
+  return parsed;
+}
+
 function createApp(options = {}) {
   const app = express();
   const server = http.createServer(app);
   const io = new Server(server);
   const db = options.db || createDatabase(options.dbPath);
+  const insightsCache = new Map();
 
   app.use(express.json());
   app.use(express.static(path.join(process.cwd(), 'public')));
@@ -41,8 +103,79 @@ function createApp(options = {}) {
     return res.json(req.user);
   });
 
+  app.get('/api/health', (_req, res) => {
+    const counts = db
+      .prepare(
+        `
+        SELECT
+          (SELECT COUNT(*) FROM destinations) AS destinations,
+          (SELECT COUNT(*) FROM bookings) AS bookings,
+          (SELECT COUNT(*) FROM users) AS users
+        `,
+      )
+      .get();
+
+    res.json({
+      ok: true,
+      uptimeSeconds: Math.floor(process.uptime()),
+      timestamp: new Date().toISOString(),
+      counts,
+    });
+  });
+
   app.get('/api/destinations', (req, res) => {
-    const destinations = db.prepare('SELECT * FROM destinations ORDER BY id').all();
+    const query = String(req.query.q || '').trim().toLowerCase();
+    const theme = String(req.query.theme || 'all').trim().toLowerCase();
+    const availability = String(req.query.availability || 'all').trim().toLowerCase();
+    const sort = String(req.query.sort || 'popular').trim();
+    const page = toPositiveInt(req.query.page, 1, { min: 1, max: 1000 });
+    const limit = toPositiveInt(req.query.limit, 100, { min: 1, max: 100 });
+    const hasExplicitPagination = req.query.page !== undefined || req.query.limit !== undefined;
+
+    let destinations = db
+      .prepare('SELECT * FROM destinations ORDER BY id')
+      .all()
+      .map((item) => normalizeDestination(item));
+
+    if (query) {
+      destinations = destinations.filter((item) => {
+        const haystack = `${item.name} ${item.country} ${item.description}`.toLowerCase();
+        return haystack.includes(query);
+      });
+    }
+
+    if (theme !== 'all') {
+      destinations = destinations.filter((item) => detectTripTheme(item) === theme);
+    }
+
+    if (availability === 'available') {
+      destinations = destinations.filter((item) => item.availableSlots > 0);
+    } else if (availability === 'limited') {
+      destinations = destinations.filter((item) => item.availableSlots > 0 && item.availableSlots <= 10);
+    } else if (availability === 'soldout') {
+      destinations = destinations.filter((item) => item.availableSlots === 0);
+    }
+
+    if (sort === 'priceAsc') {
+      destinations.sort((a, b) => a.basePrice - b.basePrice);
+    } else if (sort === 'priceDesc') {
+      destinations.sort((a, b) => b.basePrice - a.basePrice);
+    } else if (sort === 'availabilityDesc') {
+      destinations.sort((a, b) => b.availableSlots - a.availableSlots);
+    } else if (sort === 'nameAsc') {
+      destinations.sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    const total = destinations.length;
+    if (hasExplicitPagination) {
+      const start = (page - 1) * limit;
+      const end = start + limit;
+      destinations = destinations.slice(start, end);
+      res.setHeader('X-Total-Count', String(total));
+      res.setHeader('X-Page', String(page));
+      res.setHeader('X-Limit', String(limit));
+    }
+
     res.json(destinations);
   });
 
@@ -88,10 +221,44 @@ function createApp(options = {}) {
       return res.status(404).json({ errors: ['Destination not found.'] });
     }
 
+    const refresh = String(req.query.refresh || '').trim() === '1';
+    const now = Date.now();
+    const cached = insightsCache.get(destinationId);
+
+    if (!refresh && cached && cached.expiresAt > now) {
+      return res.json({
+        destinationId: destination.id,
+        insights: cached.insights,
+        cached: true,
+        cachedAt: cached.cachedAt,
+      });
+    }
+
     try {
       const insights = await getDestinationInsights(destination);
-      return res.json({ destinationId: destination.id, insights });
+      const cachedAt = new Date().toISOString();
+      insightsCache.set(destinationId, {
+        insights,
+        cachedAt,
+        expiresAt: now + INSIGHTS_TTL_MS,
+      });
+
+      return res.json({
+        destinationId: destination.id,
+        insights,
+        cached: false,
+        cachedAt,
+      });
     } catch (_error) {
+      if (cached) {
+        return res.json({
+          destinationId: destination.id,
+          insights: cached.insights,
+          cached: true,
+          stale: true,
+          cachedAt: cached.cachedAt,
+        });
+      }
       return res.status(502).json({ errors: ['Unable to fetch free travel insights right now.'] });
     }
   });
@@ -122,7 +289,7 @@ function createApp(options = {}) {
       return res.status(404).json({ errors: ['Destination not found.'] });
     }
 
-    return res.json(destination);
+    return res.json(normalizeDestination(destination));
   });
 
   app.get('/api/bookings', (req, res) => {
