@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Voyanta | Trips Explorer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="backdrop"></div>
+    <header class="hero">
+      <nav class="topbar">
+        <div class="brand-wrap">
+          <h1>Voyanta</h1>
+          <div class="site-links" aria-label="Primary navigation">
+            <a href="/index.html">Home</a>
+            <a href="/trips.html" class="active">Trips</a>
+            <a href="/bookings.html">Bookings</a>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <button class="ghost-btn theme-btn" data-theme-toggle type="button">Dark Mode</button>
+          <a class="ghost-btn link-btn" href="/index.html">Quick Reserve</a>
+        </div>
+      </nav>
+      <section class="hero-content">
+        <p class="eyebrow">Trip Discovery Workspace</p>
+        <h2>Filter destinations, compare pricing, and load live insights on demand.</h2>
+        <p class="subtitle">Built for product discovery flows and destination analysis.</p>
+      </section>
+    </header>
+
+    <main>
+      <section class="workflow-strip" aria-label="Platform map">
+        <a href="/index.html" class="workflow-card">
+          <strong>1. Home Booking</strong>
+          <span>Open reservation flow and complete traveler checkout.</span>
+        </a>
+        <a href="/trips.html" class="workflow-card active">
+          <strong>2. Trips Explorer</strong>
+          <span>Use filtering and sorting to evaluate trip options.</span>
+        </a>
+        <a href="/bookings.html" class="workflow-card">
+          <strong>3. Booking Ops</strong>
+          <span>Manage confirmed reservations and status changes.</span>
+        </a>
+      </section>
+
+      <section class="auth-panel filter-panel">
+        <h3>Explorer Filters</h3>
+        <form id="filterForm" class="auth-form">
+          <input type="text" id="searchText" placeholder="Search destination or country" />
+          <select id="sortBy" class="input-like">
+            <option value="popular">Sort: Default</option>
+            <option value="priceAsc">Price: Low to High</option>
+            <option value="priceDesc">Price: High to Low</option>
+            <option value="availabilityDesc">Availability: High to Low</option>
+          </select>
+          <select id="availabilityFilter" class="input-like">
+            <option value="all">All availability</option>
+            <option value="available">Only with seats available</option>
+            <option value="limited">Limited (10 seats or fewer)</option>
+          </select>
+        </form>
+        <div class="filter-actions">
+          <button id="toggleFavoritesOnly" class="ghost-btn" type="button">Favorites Only: Off</button>
+          <button id="resetTripsFilters" class="ghost-btn" type="button">Reset Filters</button>
+        </div>
+        <div class="chip-filter-bar" id="tripsThemeFilters" aria-label="Filter trips by style">
+          <button class="trip-tag filter-chip active" data-theme="all" type="button">All</button>
+          <button class="trip-tag filter-chip" data-theme="adventure" type="button">Adventure</button>
+          <button class="trip-tag filter-chip" data-theme="culture" type="button">Culture</button>
+          <button class="trip-tag filter-chip" data-theme="relax" type="button">Relax</button>
+          <button class="trip-tag filter-chip" data-theme="balanced" type="button">Balanced</button>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-head">
+          <h3>Trips Catalog</h3>
+          <div class="section-actions">
+            <p id="tripsSummary">Loading destinations...</p>
+            <button id="copyTripsLink" class="ghost-btn" type="button">Copy Filtered Link</button>
+          </div>
+        </div>
+        <div id="tripsGrid" class="grid"></div>
+      </section>
+    </main>
+
+    <template id="tripCardTemplate">
+      <article class="card">
+        <div class="image-wrap"><img alt="trip image" /></div>
+        <div class="card-body">
+          <div class="card-title-row">
+            <h4 class="name"></h4>
+            <span class="country"></span>
+          </div>
+          <div class="trip-tags">
+            <span class="trip-tag">Style</span>
+          </div>
+          <p class="description"></p>
+          <div class="meta-row">
+            <p class="price"></p>
+            <p class="availability"></p>
+          </div>
+          <p class="trip-math"></p>
+          <p class="weather">Weather not loaded</p>
+          <p class="facts">Facts not loaded</p>
+          <div class="card-actions">
+            <button class="ghost-btn favorite-btn" type="button">Save</button>
+            <button class="ghost-btn insights-btn" type="button">Load Insights</button>
+            <a class="primary-btn link-btn details-link" href="/destination.html">View Details</a>
+          </div>
+          <a class="detail-link quick-book-link" href="/index.html">Quick reserve from Home</a>
+        </div>
+      </article>
+    </template>
+
+    <script src="theme.js"></script>
+    <script src="trips.js"></script>
+  </body>
+</html>

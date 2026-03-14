@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Voyanta | Destination Details</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="backdrop"></div>
+    <header class="hero">
+      <nav class="topbar">
+        <div class="brand-wrap">
+          <h1>Voyanta</h1>
+          <div class="site-links" aria-label="Primary navigation">
+            <a href="/index.html">Home</a>
+            <a href="/trips.html">Trips</a>
+            <a href="/bookings.html">Bookings</a>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <button class="ghost-btn theme-btn" data-theme-toggle type="button">Dark Mode</button>
+          <a class="ghost-btn link-btn" id="reserveNowLink" href="/index.html">Reserve Now</a>
+        </div>
+      </nav>
+      <section class="hero-content">
+        <p class="eyebrow">Destination Studio</p>
+        <h2 id="destinationTitle">Loading destination...</h2>
+        <p class="subtitle" id="destinationSubtitle">Fetching your destination profile and travel signals.</p>
+      </section>
+    </header>
+
+    <main>
+      <section class="workflow-strip" aria-label="Platform map">
+        <a href="/trips.html" class="workflow-card">
+          <strong>Explore</strong>
+          <span>Compare options and shortlist destinations.</span>
+        </a>
+        <a href="/destination.html" class="workflow-card active">
+          <strong>Details</strong>
+          <span>Review full profile, metrics, and live insights.</span>
+        </a>
+        <a href="/index.html" class="workflow-card">
+          <strong>Book</strong>
+          <span>Complete booking from the Home reservation flow.</span>
+        </a>
+      </section>
+
+      <section class="detail-hero" id="detailHero">
+        <div class="detail-image-wrap">
+          <img id="detailImage" alt="Destination cover" />
+        </div>
+        <div class="detail-info">
+          <p class="eyebrow">Overview</p>
+          <h3 id="detailName">Destination</h3>
+          <p id="detailDescription">Loading description...</p>
+          <div class="detail-meta" id="detailMeta"></div>
+          <div class="card-actions">
+            <button class="ghost-btn" id="refreshInsightsBtn" type="button">Refresh Live Insights</button>
+            <a class="primary-btn link-btn" id="bookFromDetailsLink" href="/index.html">Book This Trip</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="stats-grid" id="destinationStats"></section>
+
+      <section class="booking-panel">
+        <div class="section-head">
+          <h3>Live Insights</h3>
+          <p id="insightsUpdated">Not updated yet</p>
+        </div>
+        <div class="insight-grid">
+          <article class="stat-card">
+            <p class="stat-label">Weather Snapshot</p>
+            <h4 id="weatherSummary">Pending</h4>
+          </article>
+          <article class="stat-card">
+            <p class="stat-label">Country Facts</p>
+            <h4 id="countryFacts">Pending</h4>
+          </article>
+          <article class="stat-card">
+            <p class="stat-label">Languages</p>
+            <h4 id="countryLanguages">Pending</h4>
+          </article>
+        </div>
+      </section>
+
+      <section class="booking-panel">
+        <div class="section-head">
+          <h3>Related Destinations</h3>
+          <p id="relatedSummary">Loading suggestions...</p>
+        </div>
+        <div id="relatedGrid" class="grid"></div>
+      </section>
+
+      <section class="booking-panel">
+        <div class="section-head">
+          <h3>Suggested 3-Day Itinerary</h3>
+          <p id="itineraryHint">Generated from destination profile and season.</p>
+        </div>
+        <div id="itineraryTimeline" class="itinerary-timeline"></div>
+      </section>
+    </main>
+
+    <template id="itineraryStepTemplate">
+      <article class="itinerary-step">
+        <p class="step-day"></p>
+        <h4 class="step-title"></h4>
+        <p class="step-note"></p>
+      </article>
+    </template>
+
+    <template id="relatedCardTemplate">
+      <article class="card">
+        <div class="image-wrap"><img alt="related destination" /></div>
+        <div class="card-body">
+          <div class="card-title-row">
+            <h4 class="name"></h4>
+            <span class="country"></span>
+          </div>
+          <p class="description"></p>
+          <div class="meta-row">
+            <p class="price"></p>
+            <p class="availability"></p>
+          </div>
+          <a class="primary-btn link-btn" href="/destination.html">Open Details</a>
+        </div>
+      </article>
+    </template>
+
+    <script src="theme.js"></script>
+    <script src="destination.js"></script>
+  </body>
+</html>

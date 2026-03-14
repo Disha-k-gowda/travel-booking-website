@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Voyanta | Booking Management</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="backdrop"></div>
+    <header class="hero">
+      <nav class="topbar">
+        <div class="brand-wrap">
+          <h1>Voyanta</h1>
+          <div class="site-links" aria-label="Primary navigation">
+            <a href="/index.html">Home</a>
+            <a href="/trips.html">Trips</a>
+            <a href="/bookings.html" class="active">Bookings</a>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <button class="ghost-btn theme-btn" data-theme-toggle type="button">Dark Mode</button>
+          <a class="ghost-btn link-btn" href="/index.html">New Booking</a>
+        </div>
+      </nav>
+      <section class="hero-content">
+        <p class="eyebrow">Operations Dashboard</p>
+        <h2>Track booking health, revenue, and cancellations in one place.</h2>
+        <p class="subtitle">Use the search to find a traveler by email and cancel if needed.</p>
+      </section>
+    </header>
+
+    <main>
+      <section class="workflow-strip" aria-label="Platform map">
+        <a href="/index.html" class="workflow-card">
+          <strong>1. Home Booking</strong>
+          <span>Create bookings and capture traveler details.</span>
+        </a>
+        <a href="/trips.html" class="workflow-card">
+          <strong>2. Trips Explorer</strong>
+          <span>Review destination options and availability signals.</span>
+        </a>
+        <a href="/bookings.html" class="workflow-card active">
+          <strong>3. Booking Ops</strong>
+          <span>Track KPIs, search by email, and process cancellations.</span>
+        </a>
+      </section>
+
+      <section class="stats-grid" id="statsGrid"></section>
+
+      <section class="auth-panel">
+        <h3>Find Traveler</h3>
+        <form id="searchForm" class="auth-form">
+          <input type="email" id="emailQuery" placeholder="traveler@example.com" required />
+          <button type="submit" class="primary-btn">Search</button>
+          <button type="button" id="clearSearch" class="ghost-btn">Show All</button>
+        </form>
+      </section>
+
+      <section class="booking-panel">
+        <div class="section-head">
+          <h3>Booking Records</h3>
+          <div class="section-actions">
+            <p id="bookingsSummary">Loading bookings...</p>
+            <button id="copyBookingsLink" class="ghost-btn" type="button">Copy Results Link</button>
+          </div>
+        </div>
+        <div id="managementList" class="bookings-list"></div>
+      </section>
+    </main>
+
+    <script src="theme.js"></script>
+    <script src="bookings.js"></script>
+  </body>
+</html>
