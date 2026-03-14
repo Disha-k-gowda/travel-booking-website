@@ -25,6 +25,29 @@ const gallerySummaryEl = document.getElementById('gallerySummary');
 
 let currentDestination = null;
 
+function buildFallbackImageUrl(seed) {
+  return `https://picsum.photos/seed/${encodeURIComponent(seed)}/1400/900`;
+}
+
+function applyImageWithFallback(imageEl, sources, altText, fallbackSeed) {
+  if (!imageEl) {
+    return;
+  }
+
+  const queue = [...new Set([...(sources || []), buildFallbackImageUrl(fallbackSeed)])].filter(Boolean);
+  imageEl.alt = altText || 'destination image';
+
+  const loadAt = (index) => {
+    if (index >= queue.length) {
+      return;
+    }
+    imageEl.src = queue[index];
+    imageEl.onerror = () => loadAt(index + 1);
+  };
+
+  loadAt(0);
+}
+
 function getSeasonLabel(monthIndex) {
   if (monthIndex <= 1 || monthIndex === 11) {
     return 'winter';
@@ -173,7 +196,8 @@ function renderDestination(destination) {
   currentDestination = destination;
   destinationTitleEl.textContent = `${destination.name} · ${destination.country}`;
   destinationSubtitleEl.textContent = 'Detailed travel profile with performance and insight signals.';
-  detailImageEl.src = destination.imageUrl;
+  const gallery = getGalleryImages(destination);
+  applyImageWithFallback(detailImageEl, gallery, `${destination.name} cover`, `${destination.name}-hero`);
   detailNameEl.textContent = destination.name;
   detailDescriptionEl.textContent = destination.description;
 
@@ -230,9 +254,16 @@ function renderGallery(destination) {
       button.classList.add('active');
     }
 
-    button.innerHTML = `<img src="${imageUrl}" alt="${destination.name} view ${index + 1}" loading="lazy" />`;
+    button.innerHTML = `<img alt="${destination.name} view ${index + 1}" loading="lazy" />`;
+    const thumbImage = button.querySelector('img');
+    applyImageWithFallback(
+      thumbImage,
+      [imageUrl, ...gallery],
+      `${destination.name} view ${index + 1}`,
+      `${destination.name}-thumb-${index + 1}`,
+    );
     button.addEventListener('click', () => {
-      detailImageEl.src = imageUrl;
+      applyImageWithFallback(detailImageEl, [imageUrl, ...gallery], `${destination.name} cover`, `${destination.name}-hero`);
       photoGalleryEl.querySelectorAll('.gallery-thumb').forEach((item) => item.classList.remove('active'));
       button.classList.add('active');
     });
@@ -287,7 +318,13 @@ function renderRelated(destinations) {
 
   for (const item of destinations) {
     const fragment = relatedTemplate.content.cloneNode(true);
-    fragment.querySelector('img').src = item.imageUrl;
+    const relatedImage = fragment.querySelector('img');
+    applyImageWithFallback(
+      relatedImage,
+      getGalleryImages(item),
+      `${item.name} related destination`,
+      `${item.name}-related`,
+    );
     fragment.querySelector('.name').textContent = item.name;
     fragment.querySelector('.country').textContent = item.country;
     fragment.querySelector('.description').textContent = item.description;

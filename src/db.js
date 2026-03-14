@@ -166,6 +166,20 @@ function ensureDirectoryForFile(filePath) {
   }
 }
 
+function buildReliableGallery(destination) {
+  const fromCatalog = Array.isArray(destination.galleryImages)
+    ? destination.galleryImages.filter((url) => typeof url === 'string' && url.trim())
+    : [];
+
+  const picsumSeeds = [1, 2, 3].map(
+    (index) =>
+      `https://picsum.photos/seed/${encodeURIComponent(`${destination.name}-${index}`)}/1400/900`,
+  );
+
+  const candidates = [destination.imageUrl, ...fromCatalog, ...picsumSeeds];
+  return [...new Set(candidates)].slice(0, 6);
+}
+
 function createDatabase(dbPath = path.join(process.cwd(), 'data', 'travel.sqlite')) {
   ensureDirectoryForFile(dbPath);
   const db = new Database(dbPath);
@@ -256,7 +270,7 @@ function createDatabase(dbPath = path.join(process.cwd(), 'data', 'travel.sqlite
   const syncCatalog = db.transaction((catalog) => {
     for (const destination of catalog) {
       const existing = findDestination.get(destination.name);
-      const galleryImagesJson = JSON.stringify(destination.galleryImages || [destination.imageUrl]);
+      const galleryImagesJson = JSON.stringify(buildReliableGallery(destination));
 
       if (!existing) {
         insertDestination.run({

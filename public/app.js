@@ -194,6 +194,29 @@ function getDestinationGallery(item) {
   return item.imageUrl ? [item.imageUrl] : [];
 }
 
+function buildFallbackImageUrl(seed) {
+  return `https://picsum.photos/seed/${encodeURIComponent(seed)}/1400/900`;
+}
+
+function applyImageWithFallback(imageEl, sources, altText, fallbackSeed) {
+  if (!imageEl) {
+    return;
+  }
+
+  const queue = [...new Set([...(sources || []), buildFallbackImageUrl(fallbackSeed)])].filter(Boolean);
+  imageEl.alt = altText || 'destination image';
+
+  const loadAt = (index) => {
+    if (index >= queue.length) {
+      return;
+    }
+    imageEl.src = queue[index];
+    imageEl.onerror = () => loadAt(index + 1);
+  };
+
+  loadAt(0);
+}
+
 function renderHomeInspirationGallery() {
   if (!homeInspirationGridEl || !homeGallerySummaryEl) {
     return;
@@ -222,10 +245,13 @@ function renderHomeInspirationGallery() {
     const anchor = document.createElement('a');
     anchor.className = 'inspiration-tile';
     anchor.href = `/destination.html?id=${card.id}`;
-    anchor.innerHTML = `
-      <img src="${card.imageUrl}" alt="${card.name}" loading="lazy" />
-      <span>${card.name}</span>
-    `;
+    const image = document.createElement('img');
+    image.loading = 'lazy';
+    applyImageWithFallback(image, [card.imageUrl], card.name, `${card.name}-home-tile`);
+    const label = document.createElement('span');
+    label.textContent = card.name;
+    anchor.appendChild(image);
+    anchor.appendChild(label);
     homeInspirationGridEl.appendChild(anchor);
   }
 }
@@ -269,7 +295,8 @@ function renderDestinations() {
 
   for (const item of visibleDestinations) {
     const fragment = template.content.cloneNode(true);
-    fragment.querySelector('img').src = item.imageUrl;
+    const cardImage = fragment.querySelector('img');
+    applyImageWithFallback(cardImage, getDestinationGallery(item), item.name, `${item.name}-card`);
     fragment.querySelector('.name').textContent = item.name;
     fragment.querySelector('.country').textContent = item.country;
     const theme = detectTripTheme(item);

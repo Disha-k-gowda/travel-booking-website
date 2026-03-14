@@ -20,6 +20,36 @@ const tripsKpiVisibleEl = document.getElementById('tripsKpiVisible');
 const tripsKpiStartingEl = document.getElementById('tripsKpiStarting');
 const tripsKpiFavoritesEl = document.getElementById('tripsKpiFavorites');
 
+function buildFallbackImageUrl(seed) {
+  return `https://picsum.photos/seed/${encodeURIComponent(seed)}/1400/900`;
+}
+
+function getDestinationGallery(item) {
+  if (Array.isArray(item.galleryImages) && item.galleryImages.length > 0) {
+    return item.galleryImages;
+  }
+  return item.imageUrl ? [item.imageUrl] : [];
+}
+
+function applyImageWithFallback(imageEl, sources, altText, fallbackSeed) {
+  if (!imageEl) {
+    return;
+  }
+
+  const queue = [...new Set([...(sources || []), buildFallbackImageUrl(fallbackSeed)])].filter(Boolean);
+  imageEl.alt = altText || 'trip image';
+
+  const loadAt = (index) => {
+    if (index >= queue.length) {
+      return;
+    }
+    imageEl.src = queue[index];
+    imageEl.onerror = () => loadAt(index + 1);
+  };
+
+  loadAt(0);
+}
+
 function loadFavorites() {
   try {
     const raw = localStorage.getItem('voyanta_favorites');
@@ -229,7 +259,8 @@ function renderTrips() {
   for (const item of state.filtered) {
     const fragment = tripTemplate.content.cloneNode(true);
 
-    fragment.querySelector('img').src = item.imageUrl;
+    const cardImage = fragment.querySelector('img');
+    applyImageWithFallback(cardImage, getDestinationGallery(item), item.name, `${item.name}-trips`);
     fragment.querySelector('.name').textContent = item.name;
     fragment.querySelector('.country').textContent = item.country;
     const theme = detectTripTheme(item);
